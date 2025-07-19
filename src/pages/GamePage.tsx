@@ -535,7 +535,8 @@ export function GamePage() {
     )
   }
 
-  if (gameState.status === 'finished') {
+  // Don't render the finished modal if we're showing the winning hand
+  if (gameState.status === 'finished' && !showWinningHand) {
     const winner = gameState.winner !== undefined ? gameState.players[gameState.winner] : null
     const isWinner = winner?.id === currentUser.id
 
@@ -661,7 +662,10 @@ export function GamePage() {
           winningTile={gameState.winningTile || null}
           winningHand={gameState.winningHand}
           winType={gameState.winType}
-          onClose={() => setShowWinningHand(false)}
+          onClose={() => {
+            setShowWinningHand(false)
+            // The finished modal will now be shown automatically
+          }}
         />
       )}
     </div>

@@ -7,7 +7,6 @@ import { GamePage } from '@/pages/GamePage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { LeaderboardsPage } from '@/pages/LeaderboardsPage'
 import { Toaster } from '@/components/ui/toaster'
-import { blink } from '@/blink/client'
 import './App.css'
 
 interface User {
@@ -21,14 +20,12 @@ interface User {
 
 function App() {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Changed to false temporarily
 
+  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
-      setUser(state.user)
-      setLoading(state.isLoading)
-    })
-    return unsubscribe
+    // Placeholder for Supabase auth
+    setLoading(false)
   }, [])
 
   if (loading) {

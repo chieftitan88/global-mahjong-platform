@@ -19,18 +19,18 @@ import {
   Video,
   Settings
 } from 'lucide-react'
-import { blink } from '@/blink/client'
 
 interface GameRoom {
   id: string
   name: string
-  variant: string
   players: number
   maxPlayers: number
-  isPrivate: boolean
-  hasVideo: boolean
-  createdAt: string
-  host: {
+  variant: string
+  stakes?: string
+  isPrivate?: boolean
+  hasVideo?: boolean
+  createdAt?: string
+  host?: {
     name: string
     avatar?: string
     rating: number
@@ -39,12 +39,14 @@ interface GameRoom {
 
 interface RecentGame {
   id: string
-  variant: string
+  variant?: string
+  opponent?: string
   result: 'win' | 'loss' | 'draw'
   score: number
   duration: string
-  playedAt: string
-  opponents: string[]
+  timestamp?: Date
+  playedAt?: string
+  opponents?: string[]
 }
 
 interface User {
@@ -61,17 +63,14 @@ interface User {
 export function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Changed to false temporarily
   const [activeRooms, setActiveRooms] = useState<GameRoom[]>([])
   const [recentGames, setRecentGames] = useState<RecentGame[]>([])
 
-
+  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
-      setUser(state.user)
-      setLoading(state.isLoading)
-    })
-    return unsubscribe
+    // Placeholder for Supabase auth
+    setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -259,9 +258,9 @@ export function Dashboard() {
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={room.host.avatar} />
+                          <AvatarImage src={room.host?.avatar} />
                           <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                            {room.host.name.charAt(0)}
+                            {room.host?.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -269,7 +268,7 @@ export function Dashboard() {
                           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                             <span>{room.variant}</span>
                             <span>•</span>
-                            <span>Host: {room.host.name} ({room.host.rating})</span>
+                            <span>Host: {room.host?.name} ({room.host?.rating})</span>
                           </div>
                         </div>
                       </div>

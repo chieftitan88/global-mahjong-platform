@@ -58,6 +58,7 @@ export function GameTable({
   const [showClaimOptions, setShowClaimOptions] = useState(false)
   const [claimTimeLeft, setClaimTimeLeft] = useState(0)
   const [showDiscardViewer, setShowDiscardViewer] = useState(false)
+  const [showRules, setShowRules] = useState(false)
   const [videoEnabled, setVideoEnabled] = useState(true)
   const [audioEnabled, setAudioEnabled] = useState(true)
   const [soundEnabled, setSoundEnabledState] = useState(isSoundEnabled())
@@ -451,6 +452,15 @@ export function GameTable({
       )}>
         <div className="flex items-center space-x-2 bg-card/90 backdrop-blur-md rounded-lg px-3 py-2 border border-border/40 shadow-lg">
           <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setShowRules(true)}
+            className="h-9 w-9 p-0 hover:scale-105 transition-all duration-200"
+            title="Game Rules"
+          >
+            <BookOpen className="w-5 h-5" />
+          </Button>
+          <Button
             size={isMobile ? "sm" : "sm"}
             variant="ghost"
             onClick={() => setVideoEnabled(!videoEnabled)}
@@ -817,6 +827,12 @@ export function GameTable({
         discardPile={gameState.discardPile}
         playerDiscards={playerDiscards}
         playerNames={playerNames}
+      />
+
+      {/* Game Rules Modal */}
+      <GameRules 
+        isOpen={showRules} 
+        onClose={() => setShowRules(false)} 
       />
     </div>
   )

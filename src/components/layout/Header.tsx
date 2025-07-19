@@ -20,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { blink } from '@/blink/client'
 
 interface User {
   id: string
@@ -35,18 +34,17 @@ export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Changed to false temporarily
 
+  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
-      setUser(state.user)
-      setLoading(state.isLoading)
-    })
-    return unsubscribe
+    // Placeholder for Supabase auth
+    setLoading(false)
   }, [])
 
   const handleLogout = () => {
-    blink.auth.logout()
+    // Removed Blink logout - will be replaced with Supabase
+    console.log('Logout functionality will be restored with Supabase')
   }
 
   const handleNavigation = (path: string) => {

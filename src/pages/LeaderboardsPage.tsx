@@ -1,201 +1,59 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { blink } from '@/blink/client'
-import { 
-  Trophy, 
-  Crown,
-  Medal,
-  TrendingUp,
-  Calendar,
-  Globe,
-  Star,
-  Target,
-  Users,
-  Gamepad2
-} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Trophy, Crown, Star, Medal, TrendingUp, Calendar, Users, Gamepad2 } from 'lucide-react'
 
 interface LeaderboardEntry {
+  id: string
   rank: number
-  userId: string
   displayName: string
-  avatarUrl?: string
-  country?: string
+  avatar?: string
   rating: number
   gamesPlayed: number
   gamesWon: number
   winRate: number
+  currentStreak: number
+  country?: string
   isPremium: boolean
-  favoriteVariant: string
+  ratingChange: number // +/- from last week
 }
 
-interface TournamentWinner {
+interface User {
   id: string
-  tournamentName: string
-  winnerName: string
-  winnerAvatar?: string
-  winnerCountry?: string
-  prize: number
-  date: string
-  participants: number
+  email: string
+  displayName?: string
+  avatar?: string
 }
-
-const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  {
-    rank: 1,
-    userId: 'user1',
-    displayName: 'Chen Wei',
-    country: 'China',
-    rating: 2380,
-    gamesPlayed: 156,
-    gamesWon: 98,
-    winRate: 62.8,
-    isPremium: true,
-    favoriteVariant: 'Chinese Classical'
-  },
-  {
-    rank: 2,
-    userId: 'user2',
-    displayName: 'Yuki Tanaka',
-    country: 'Japan',
-    rating: 2350,
-    gamesPlayed: 203,
-    gamesWon: 121,
-    winRate: 59.6,
-    isPremium: true,
-    favoriteVariant: 'Japanese Riichi'
-  },
-  {
-    rank: 3,
-    userId: 'user3',
-    displayName: 'Sarah Kim',
-    country: 'Korea',
-    rating: 2290,
-    gamesPlayed: 134,
-    gamesWon: 79,
-    winRate: 59.0,
-    isPremium: false,
-    favoriteVariant: 'Filipino Mahjong'
-  },
-  {
-    rank: 4,
-    userId: 'user4',
-    displayName: 'Li Ming',
-    country: 'Singapore',
-    rating: 2250,
-    gamesPlayed: 189,
-    gamesWon: 108,
-    winRate: 57.1,
-    isPremium: true,
-    favoriteVariant: 'Hong Kong Mahjong'
-  },
-  {
-    rank: 5,
-    userId: 'user5',
-    displayName: 'Maria Santos',
-    country: 'Philippines',
-    rating: 2180,
-    gamesPlayed: 167,
-    gamesWon: 92,
-    winRate: 55.1,
-    isPremium: false,
-    favoriteVariant: 'Filipino Mahjong'
-  }
-]
-
-const MOCK_TOURNAMENT_WINNERS: TournamentWinner[] = [
-  {
-    id: 'tournament1',
-    tournamentName: 'Global Championship 2024',
-    winnerName: 'Chen Wei',
-    winnerCountry: 'China',
-    prize: 1000,
-    date: '2024-01-15',
-    participants: 64
-  },
-  {
-    id: 'tournament2',
-    tournamentName: 'Asian Masters Cup',
-    winnerName: 'Yuki Tanaka',
-    winnerCountry: 'Japan',
-    prize: 500,
-    date: '2024-01-10',
-    participants: 32
-  },
-  {
-    id: 'tournament3',
-    tournamentName: 'Filipino Mahjong Open',
-    winnerName: 'Maria Santos',
-    winnerCountry: 'Philippines',
-    prize: 250,
-    date: '2024-01-05',
-    participants: 16
-  }
-]
 
 export function LeaderboardsPage() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [tournamentWinners, setTournamentWinners] = useState<TournamentWinner[]>([])
-  const [selectedVariant, setSelectedVariant] = useState('all')
-  const [selectedRegion, setSelectedRegion] = useState('all')
-  const [timeframe, setTimeframe] = useState('all-time')
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [weeklyLeaderboard, setWeeklyLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [monthlyLeaderboard, setMonthlyLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [selectedTab, setSelectedTab] = useState('global')
 
+  // Removed Blink auth and database logic - will be replaced with Supabase
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
-      setUser(state.user)
-      setLoading(state.isLoading)
-    })
-    return unsubscribe
+    // Placeholder for Supabase auth
+    setLoading(false)
   }, [])
-
-  useEffect(() => {
-    if (user) {
-      loadLeaderboards()
-    }
-  }, [user, selectedVariant, selectedRegion, timeframe])
 
   const loadLeaderboards = async () => {
     try {
-      // Try to load real data from database
-      const profiles = await blink.db.userProfiles.list({
-        orderBy: { rating: 'desc' },
-        limit: 50
-      })
-
-      if (profiles.length > 0) {
-        const leaderboardData = profiles.map((profile, index) => ({
-          rank: index + 1,
-          userId: profile.userId,
-          displayName: profile.displayName || 'Anonymous',
-          avatarUrl: profile.avatarUrl,
-          country: profile.country,
-          rating: profile.rating || 1500,
-          gamesPlayed: profile.gamesPlayed || 0,
-          gamesWon: profile.gamesWon || 0,
-          winRate: profile.winRate || 0,
-          isPremium: Number(profile.isPremium) > 0,
-          favoriteVariant: profile.favoriteVariant || 'Filipino Mahjong'
-        }))
-        setLeaderboard(leaderboardData)
-      } else {
-        // Fallback to mock data
-        setLeaderboard(MOCK_LEADERBOARD)
-      }
-
-      // Load tournament winners (using mock data for now)
-      setTournamentWinners(MOCK_TOURNAMENT_WINNERS)
+      // Removed Blink database operations - will be replaced with Supabase
+      console.log('Leaderboard loading functionality will be restored with Supabase')
+      
+      // Set empty arrays for now
+      setGlobalLeaderboard([])
+      setWeeklyLeaderboard([])
+      setMonthlyLeaderboard([])
     } catch (error) {
       console.error('Failed to load leaderboards:', error)
-      // Fallback to mock data
-      setLeaderboard(MOCK_LEADERBOARD)
-      setTournamentWinners(MOCK_TOURNAMENT_WINNERS)
     }
   }
 
@@ -220,9 +78,8 @@ export function LeaderboardsPage() {
     return 'bg-muted/20 text-muted-foreground border-muted/30'
   }
 
-  const filteredLeaderboard = leaderboard.filter(entry => {
-    if (selectedVariant !== 'all' && entry.favoriteVariant !== selectedVariant) return false
-    if (selectedRegion !== 'all' && entry.country !== selectedRegion) return false
+  const filteredLeaderboard = globalLeaderboard.filter(entry => {
+    // Filters will be re-implemented with Supabase
     return true
   })
 
@@ -341,11 +198,11 @@ export function LeaderboardsPage() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {filteredLeaderboard.slice(0, 3).map((entry, index) => (
-                    <Card key={entry.userId} className={`bg-card/50 ${index === 0 ? 'md:order-2 ring-2 ring-yellow-500/50' : index === 1 ? 'md:order-1' : 'md:order-3'}`}>
+                    <Card key={entry.id} className={`bg-card/50 ${index === 0 ? 'md:order-2 ring-2 ring-yellow-500/50' : index === 1 ? 'md:order-1' : 'md:order-3'}`}>
                       <CardContent className="p-6 text-center">
                         <div className="relative mb-4">
                           <Avatar className="w-20 h-20 mx-auto">
-                            <AvatarImage src={entry.avatarUrl} />
+                            <AvatarImage src={entry.avatar} />
                             <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                               {entry.displayName.charAt(0)}
                             </AvatarFallback>
@@ -399,14 +256,14 @@ export function LeaderboardsPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {filteredLeaderboard.slice(3).map((entry) => (
-                        <div key={entry.userId} className="flex items-center space-x-4 p-4 bg-background/50 rounded-lg border border-border/50 hover:bg-background/80 transition-colors">
+                        <div key={entry.id} className="flex items-center space-x-4 p-4 bg-background/50 rounded-lg border border-border/50 hover:bg-background/80 transition-colors">
                           <div className="flex items-center justify-center w-12">
                             {getRankIcon(entry.rank)}
                           </div>
                           
                           <div className="relative">
                             <Avatar className="w-12 h-12">
-                              <AvatarImage src={entry.avatarUrl} />
+                              <AvatarImage src={entry.avatar} />
                               <AvatarFallback className="bg-primary text-primary-foreground">
                                 {entry.displayName.charAt(0)}
                               </AvatarFallback>
@@ -462,43 +319,8 @@ export function LeaderboardsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {tournamentWinners.map((winner, index) => (
-                        <div key={winner.id} className="flex items-center space-x-4 p-4 bg-background/50 rounded-lg border border-border/50">
-                          <div className="flex items-center justify-center w-12">
-                            {index === 0 ? (
-                              <Trophy className="w-8 h-8 text-yellow-500" />
-                            ) : (
-                              <Crown className="w-8 h-8 text-accent" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg">{winner.tournamentName}</h4>
-                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                              <span>Winner: {winner.winnerName}</span>
-                              {winner.winnerCountry && (
-                                <div className="flex items-center space-x-1">
-                                  <Globe className="w-3 h-3" />
-                                  <span>{winner.winnerCountry}</span>
-                                </div>
-                              )}
-                              <div className="flex items-center space-x-1">
-                                <Users className="w-3 h-3" />
-                                <span>{winner.participants} players</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>{new Date(winner.date).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-green-500">${winner.prize}</div>
-                            <div className="text-sm text-muted-foreground">Prize</div>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Tournament winners will be re-implemented with Supabase */}
+                      <p className="text-muted-foreground">Tournament winners functionality will be restored with Supabase.</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -517,7 +339,7 @@ export function LeaderboardsPage() {
                     <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                       <Users className="w-8 h-8 text-primary" />
                     </div>
-                    <div className="text-3xl font-bold mb-2">{leaderboard.length.toLocaleString()}</div>
+                    <div className="text-3xl font-bold mb-2">{globalLeaderboard.length.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">Total Players</div>
                   </CardContent>
                 </Card>
@@ -528,7 +350,7 @@ export function LeaderboardsPage() {
                       <Gamepad2 className="w-8 h-8 text-accent" />
                     </div>
                     <div className="text-3xl font-bold mb-2">
-                      {leaderboard.reduce((sum, p) => sum + p.gamesPlayed, 0).toLocaleString()}
+                      {globalLeaderboard.reduce((sum, p) => sum + p.gamesPlayed, 0).toLocaleString()}
                     </div>
                     <div className="text-sm text-muted-foreground">Games Played</div>
                   </CardContent>
@@ -540,7 +362,7 @@ export function LeaderboardsPage() {
                       <Trophy className="w-8 h-8 text-green-500" />
                     </div>
                     <div className="text-3xl font-bold mb-2">
-                      {Math.max(...leaderboard.map(p => p.rating))}
+                      {Math.max(...globalLeaderboard.map(p => p.rating))}
                     </div>
                     <div className="text-sm text-muted-foreground">Highest Rating</div>
                   </CardContent>
@@ -552,7 +374,7 @@ export function LeaderboardsPage() {
                       <Star className="w-8 h-8 text-blue-500" />
                     </div>
                     <div className="text-3xl font-bold mb-2">
-                      {(leaderboard.reduce((sum, p) => sum + p.winRate, 0) / leaderboard.length).toFixed(1)}%
+                      {(globalLeaderboard.reduce((sum, p) => sum + p.winRate, 0) / globalLeaderboard.length).toFixed(1)}%
                     </div>
                     <div className="text-sm text-muted-foreground">Avg Win Rate</div>
                   </CardContent>

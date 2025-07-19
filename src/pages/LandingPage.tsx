@@ -16,7 +16,6 @@ import {
   ArrowRight,
   Gamepad2
 } from 'lucide-react'
-import { blink } from '@/blink/client'
 
 const features = [
   {
@@ -81,7 +80,8 @@ export function LandingPage() {
   const handleGetStarted = async () => {
     setIsLoading(true)
     try {
-      blink.auth.login()
+      // Removed Blink login - will be replaced with Supabase
+      console.log('Login functionality will be restored with Supabase')
     } catch (error) {
       console.error('Login failed:', error)
     } finally {

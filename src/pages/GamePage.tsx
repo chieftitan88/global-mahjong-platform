@@ -14,7 +14,7 @@ import {
   validateGameState,
 } from '@/utils/filipinoMahjongLogic'
 import { createEnhancedAI, simulateThinkingTime } from '@/utils/enhancedMahjongAI'
-import { blink } from '@/blink/client'
+import { authService, type AuthUser } from '@/services/authService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -22,14 +22,12 @@ import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Users, Trophy, Clock } from 'lucide-react'
 import { playDiscard, playDraw, playWin, playClaim, initializeSounds } from '@/utils/soundEffects'
 
-
-
 export function GamePage() {
-  const { gameId } = useParams()
   const navigate = useNavigate()
+  const { gameId } = useParams()
   const { toast } = useToast()
   const [gameState, setGameState] = useState<GameState | null>(null)
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [claimTimeout, setClaimTimeout] = useState<number | null>(null)
@@ -46,7 +44,7 @@ export function GamePage() {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = blink.auth.onAuthStateChanged((state) => {
+    const unsubscribe = authService.onAuthStateChanged((state) => {
       setCurrentUser(state.user)
       setLoading(state.isLoading)
     })

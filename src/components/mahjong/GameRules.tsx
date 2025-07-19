@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +7,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 
 interface GameRulesProps {
   isOpen: boolean
@@ -158,9 +157,7 @@ export function GameRules({ isOpen, onClose }: GameRulesProps) {
         </DialogHeader>
         <ScrollArea className="h-[70vh] w-full rounded-md border p-6">
           <div className="prose dark:prose-invert max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {friendlyRules}
-            </ReactMarkdown>
+            {friendlyRules}
           </div>
         </ScrollArea>
       </DialogContent>

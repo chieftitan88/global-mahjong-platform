@@ -7,25 +7,19 @@ import { GamePage } from '@/pages/GamePage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { LeaderboardsPage } from '@/pages/LeaderboardsPage'
 import { Toaster } from '@/components/ui/toaster'
+import { authService, type AuthUser } from '@/services/authService'
 import './App.css'
 
-interface User {
-  id: string
-  email: string
-  displayName?: string
-  avatar?: string
-  isPremium?: boolean
-  rating?: number
-}
-
 function App() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false) // Changed to false temporarily
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    // Placeholder for Supabase auth
-    setLoading(false)
+    const unsubscribe = authService.onAuthStateChanged((state) => {
+      setUser(state.user)
+      setLoading(state.isLoading)
+    })
+    return unsubscribe
   }, [])
 
   if (loading) {

@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
+import { Badge } from '@/components/ui/badge'
 import { 
+  Play, 
   Users, 
   Trophy, 
-  Clock, 
-  Play,
+  Star,
+  Plus,
+  Clock,
   Crown,
   Gamepad2,
   TrendingUp,
@@ -19,6 +20,7 @@ import {
   Video,
   Settings
 } from 'lucide-react'
+import { authService, type AuthUser } from '@/services/authService'
 
 interface GameRoom {
   id: string
@@ -49,28 +51,19 @@ interface RecentGame {
   opponents?: string[]
 }
 
-interface User {
-  id: string
-  email: string
-  displayName?: string
-  avatar?: string
-  isPremium?: boolean
-  rating?: number
-  gamesPlayed?: number
-  winRate?: number
-}
-
 export function Dashboard() {
   const navigate = useNavigate()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false) // Changed to false temporarily
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
   const [activeRooms, setActiveRooms] = useState<GameRoom[]>([])
   const [recentGames, setRecentGames] = useState<RecentGame[]>([])
 
-  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    // Placeholder for Supabase auth
-    setLoading(false)
+    const unsubscribe = authService.onAuthStateChanged((state) => {
+      setUser(state.user)
+      setLoading(state.isLoading)
+    })
+    return unsubscribe
   }, [])
 
   useEffect(() => {
@@ -195,7 +188,7 @@ export function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Games Played</p>
-                    <p className="text-2xl font-bold">{user?.gamesPlayed || 0}</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                 </div>
               </CardContent>
@@ -209,7 +202,7 @@ export function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Win Rate</p>
-                    <p className="text-2xl font-bold">{user?.winRate || 0}%</p>
+                    <p className="text-2xl font-bold">0%</p>
                   </div>
                 </div>
               </CardContent>

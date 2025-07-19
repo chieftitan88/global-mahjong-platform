@@ -20,31 +20,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
-interface User {
-  id: string
-  email: string
-  displayName?: string
-  avatar?: string
-  isPremium?: boolean
-  rating?: number
-}
+import { authService, type AuthUser } from '@/services/authService'
 
 export function Header() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false) // Changed to false temporarily
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Removed Blink auth logic - will be replaced with Supabase
   useEffect(() => {
-    // Placeholder for Supabase auth
-    setLoading(false)
+    const unsubscribe = authService.onAuthStateChanged((state) => {
+      setUser(state.user)
+      setLoading(state.isLoading)
+    })
+    return unsubscribe
   }, [])
 
-  const handleLogout = () => {
-    // Removed Blink logout - will be replaced with Supabase
-    console.log('Logout functionality will be restored with Supabase')
+  const handleLogout = async () => {
+    try {
+      await authService.signOut()
+      navigate('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
   }
 
   const handleNavigation = (path: string) => {

@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Gamepad2
 } from 'lucide-react'
+import { authService } from '@/services/authService'
 
 const features = [
   {
@@ -40,37 +41,37 @@ const features = [
   },
   {
     icon: Shield,
-    title: 'Anti-Cheat Security',
-    description: 'Advanced security measures ensure fair play for everyone'
+    title: 'Fair Play Guaranteed',
+    description: 'Advanced anti-cheat systems ensure fair gameplay'
   },
   {
     icon: Zap,
     title: 'Lightning Fast',
-    description: 'Ultra-low latency gameplay for seamless tile interactions'
+    description: 'Optimized for speed with sub-100ms response times'
   }
 ]
 
 const testimonials = [
   {
     name: 'Chen Wei',
-    location: 'Shanghai, China',
-    rating: 2150,
-    text: 'The most authentic online Mahjong experience. Video chat makes it feel like playing in person.',
-    avatar: '👨‍💼'
+    avatar: '/avatars/chen.jpg',
+    rating: 2350,
+    country: 'China',
+    quote: 'The best online Mahjong platform I\'ve ever used. The community is amazing!'
   },
   {
     name: 'Yuki Tanaka',
-    location: 'Tokyo, Japan',
-    rating: 1980,
-    text: 'Perfect Riichi implementation. The tournament system is incredibly well designed.',
-    avatar: '👩‍💻'
+    avatar: '/avatars/yuki.jpg', 
+    rating: 2280,
+    country: 'Japan',
+    quote: 'Finally, a platform that gets Japanese Riichi right. Absolutely perfect!'
   },
   {
-    name: 'Sarah Kim',
-    location: 'Seoul, Korea',
-    rating: 2050,
-    text: 'Finally, a platform that brings together players from all over Asia. Love the community!',
-    avatar: '👩‍🎨'
+    name: 'Maria Santos',
+    avatar: '/avatars/maria.jpg',
+    rating: 2190,
+    country: 'Philippines', 
+    quote: 'Love the Filipino variant! Feels just like playing with friends at home.'
   }
 ]
 
@@ -80,11 +81,9 @@ export function LandingPage() {
   const handleGetStarted = async () => {
     setIsLoading(true)
     try {
-      // Removed Blink login - will be replaced with Supabase
-      console.log('Login functionality will be restored with Supabase')
+      await authService.signInWithGoogle()
     } catch (error) {
       console.error('Login failed:', error)
-    } finally {
       setIsLoading(false)
     }
   }
@@ -232,7 +231,7 @@ export function LandingPage() {
                       <div className="text-3xl">{testimonial.avatar}</div>
                       <div>
                         <h4 className="font-semibold">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                        <p className="text-sm text-muted-foreground">{testimonial.country}</p>
                         <div className="flex items-center space-x-1 mt-1">
                           <Trophy className="w-3 h-3 text-accent" />
                           <span className="text-sm text-accent">{testimonial.rating}</span>
@@ -245,7 +244,7 @@ export function LandingPage() {
                       ))}
                     </div>
                     <p className="text-muted-foreground italic">
-                      &quot;{testimonial.text}&quot;
+                      &quot;{testimonial.quote}&quot;
                     </p>
                   </CardContent>
                 </Card>

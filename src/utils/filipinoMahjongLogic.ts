@@ -459,9 +459,9 @@ export function isValidClaim(gameState: GameState, claim: ClaimAction): boolean 
   if (!player || !gameState.lastDiscard) return false
   
   const lastDiscard = gameState.lastDiscard
+  const playerIndex = gameState.players.findIndex(p => p.id === claim.playerId)
   
   // CRITICAL: Cannot claim your own discard
-  const playerIndex = gameState.players.findIndex(p => p.id === claim.playerId)
   if (playerIndex === gameState.currentPlayer) {
     console.log(`❌ ${player.name} cannot claim their own discard`)
     return false
@@ -474,12 +474,21 @@ export function isValidClaim(gameState: GameState, claim: ClaimAction): boolean 
   
   switch (claim.type) {
     case 'chow': {
-      // In Filipino Mahjong, any player can claim chow (not just left player like in Chinese Mahjong)
+      // CHOW RESTRICTION: Can only be claimed by the player immediately after the discarding player
+      if (gameState.lastDiscardPlayer !== undefined) {
+        const nextPlayerIndex = (gameState.lastDiscardPlayer + 1) % 4
+        if (playerIndex !== nextPlayerIndex) {
+          console.log(`❌ CHOW can only be claimed by player ${nextPlayerIndex} (next in sequence), but player ${playerIndex} tried to claim`)
+          return false
+        }
+      }
+      
       // Need 2 tiles to form sequence with discard
       return canFormSequence(player.hand, lastDiscard)
     }
       
     case 'pung': {
+      // PUNG can be claimed by any player (no turn sequence restriction)
       // Need 2 matching tiles
       const matchingTiles = player.hand.filter(t => tilesMatch(t, lastDiscard))
       const isValid = matchingTiles.length >= 2
@@ -488,10 +497,12 @@ export function isValidClaim(gameState: GameState, claim: ClaimAction): boolean 
     }
       
     case 'kong':
+      // KONG can be claimed by any player (no turn sequence restriction)
       // Need 3 matching tiles
       return player.hand.filter(t => tilesMatch(t, lastDiscard)).length >= 3
       
     case 'win':
+      // WIN can be claimed by any player (no turn sequence restriction)
       return isWinningHand(player.hand.concat([lastDiscard]), player.melds, player.flowers).isValid
       
     default:
@@ -591,7 +602,30 @@ export function processClaim(gameState: GameState, claim: ClaimAction): boolean 
   
   switch (claim.type) {
     case 'chow': {
-      const chowTiles = formChow(player.hand, lastDiscard)
+      // Use specific tiles if provided (from UI multi-option selection), otherwise use legacy auto-detection
+      let chowTiles: Tile[] | null = null
+      
+      if (claim.tiles && claim.tiles.length === 3) {
+        // User chose specific tiles from UI - validate they form a valid sequence with the discard
+        const userChowTiles = claim.tiles
+        const hasDiscard = userChowTiles.some(tile => tile.id === lastDiscard.id)
+        const sortedValues = userChowTiles.map(t => t.value!).sort((a, b) => a - b)
+        const isValidSequence = sortedValues[1] === sortedValues[0] + 1 && sortedValues[2] === sortedValues[1] + 1
+        const sameSuit = userChowTiles.every(t => t.suit === lastDiscard.suit)
+        
+        if (hasDiscard && isValidSequence && sameSuit) {
+          console.log(`✅ Using user-selected CHOW tiles:`, userChowTiles.map(t => `${t.suit} ${t.value}`))
+          chowTiles = userChowTiles
+        } else {
+          console.error(`❌ Invalid user-selected CHOW tiles:`, userChowTiles.map(t => `${t.suit} ${t.value}`))
+          return false
+        }
+      } else {
+        // Legacy auto-detection (for AI or fallback)
+        chowTiles = formChow(player.hand, lastDiscard)
+        console.log(`🤖 Auto-detected CHOW tiles:`, chowTiles?.map(t => `${t.suit} ${t.value}`) || 'none')
+      }
+      
       if (chowTiles) {
         // Remove the claimed tile from discard pile
         const discardIndex = gameState.discardPile.findIndex(t => t.id === lastDiscard.id)

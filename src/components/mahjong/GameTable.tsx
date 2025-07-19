@@ -11,6 +11,7 @@ import { DiscardPileViewer } from './DiscardPileViewer'
 import { GameHints } from './GameHints'
 import { GameState, Player, Tile, ClaimAction } from '@/types/mahjong'
 import { sortTiles } from '@/utils/mahjongTiles'
+import { getAllPossibleSequences } from '@/utils/filipinoMahjongLogic'
 import { 
   Clock, 
   Users, 
@@ -23,11 +24,13 @@ import {
   MessageCircle,
   History,
   Volume2,
-  VolumeX
+  VolumeX,
+  BookOpen
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { setSoundEnabled, isSoundEnabled } from '@/utils/soundEffects'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { GameRules } from './GameRules'
 
 interface GameTableProps {
   gameState: GameState
@@ -656,74 +659,71 @@ export function GameTable({
               </div>
               
               <div className="space-y-2">
-                {/* Chow option - using same pattern as Kong/Pung */}
+                {/* Chow options - show ALL possible sequences */}
                 {(() => {
                   // Check if player can form a chow with the last discard
                   if (!gameState.lastDiscard || !['circles', 'bamboos', 'characters'].includes(gameState.lastDiscard.suit)) {
                     return null
                   }
                   
-                  const discardValue = gameState.lastDiscard.value!
-                  const suitTiles = currentPlayer.hand.filter(t => t.suit === gameState.lastDiscard!.suit && t.value)
-                  
-                  // Check for possible sequences using the same logic as filipinoMahjongLogic.ts
-                  let canFormChow = false
-                  let sequenceType = ''
-                  let foundTiles: Tile[] = []
-                  
-                  // Pattern 1: discard + 1 + 2 (e.g., 2-3-4 with discard=2)
-                  if (discardValue <= 7) {
-                    const tile1 = suitTiles.find(t => t.value === discardValue + 1)
-                    const tile2 = suitTiles.find(t => t.value === discardValue + 2)
-                    if (tile1 && tile2) {
-                      canFormChow = true
-                      sequenceType = `${discardValue}-${discardValue + 1}-${discardValue + 2}`
-                      foundTiles = [gameState.lastDiscard, tile1, tile2]
+                  // CHOW RESTRICTION: Can only be claimed by the player immediately after the discarding player
+                  if (gameState.lastDiscardPlayer !== undefined) {
+                    const nextPlayerIndex = (gameState.lastDiscardPlayer + 1) % 4
+                    if (currentPlayerIndex !== nextPlayerIndex) {
+                      console.log(`❌ CHOW not available: player ${currentPlayerIndex} is not next in sequence (expected ${nextPlayerIndex})`)
+                      return null
                     }
                   }
                   
-                  // Pattern 2: -1 + discard + 1 (e.g., 2-3-4 with discard=3)
-                  if (!canFormChow && discardValue >= 2 && discardValue <= 8) {
-                    const tile1 = suitTiles.find(t => t.value === discardValue - 1)
-                    const tile2 = suitTiles.find(t => t.value === discardValue + 1)
-                    if (tile1 && tile2) {
-                      canFormChow = true
-                      sequenceType = `${discardValue - 1}-${discardValue}-${discardValue + 1}`
-                      foundTiles = [tile1, gameState.lastDiscard, tile2]
-                    }
+                  // Get ALL possible sequences using the existing function from filipinoMahjongLogic.ts
+                  const allSequences = getAllPossibleSequences(currentPlayer.hand, gameState.lastDiscard)
+                  
+                  if (allSequences.length === 0) {
+                    return null
                   }
                   
-                  // Pattern 3: -2 + -1 + discard (e.g., 2-3-4 with discard=4)
-                  if (!canFormChow && discardValue >= 3) {
-                    const tile1 = suitTiles.find(t => t.value === discardValue - 2)
-                    const tile2 = suitTiles.find(t => t.value === discardValue - 1)
-                    if (tile1 && tile2) {
-                      canFormChow = true
-                      sequenceType = `${discardValue - 2}-${discardValue - 1}-${discardValue}`
-                      foundTiles = [tile1, tile2, gameState.lastDiscard]
-                    }
-                  }
-                  
-                  return canFormChow && (
-                    <Button
-                      className="w-full justify-start text-left p-3"
-                      variant="outline"
-                      onClick={() => {
-                        onClaim({ type: 'chow', playerId: currentUserId })
-                        setShowClaimOptions(false)
-                      }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs font-semibold">Chow:</span>
-                        <div className="flex items-center space-x-1">
-                          {foundTiles.map((tile, i) => (
-                            <MahjongTile key={i} tile={tile} size="sm" />
-                          ))}
+                  // Show each sequence as a separate button option
+                  return allSequences.map((sequence, index) => {
+                    // Create a descriptive label for the sequence
+                    const sequenceValues = sequence.map(tile => tile.value).sort((a, b) => a! - b!)
+                    const sequenceLabel = `${sequenceValues[0]}-${sequenceValues[1]}-${sequenceValues[2]}`
+                    
+                    return (
+                      <Button
+                        key={`chow-option-${index}`}
+                        className="w-full justify-start text-left p-3 mb-2"
+                        variant="outline"
+                        onClick={() => {
+                          onClaim({ 
+                            type: 'chow', 
+                            playerId: currentUserId,
+                            // Pass the specific sequence tiles for the claim
+                            tiles: sequence 
+                          })
+                          setShowClaimOptions(false)
+                        }}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-semibold">Chow:</span>
+                          <div className="flex items-center space-x-1">
+                            {sequence.map((tile, tileIndex) => (
+                              <MahjongTile 
+                                key={`${index}-${tileIndex}-${tile.id}`} 
+                                tile={tile} 
+                                size="sm" 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-muted-foreground">{sequenceLabel}</span>
+                          {allSequences.length > 1 && (
+                            <Badge variant="secondary" className="text-xs">
+                              Option {index + 1}
+                            </Badge>
+                          )}
                         </div>
-                        <span className="text-sm">{sequenceType}</span>
-                      </div>
-                    </Button>
-                  )
+                      </Button>
+                    )
+                  })
                 })()}
                 
                 {/* Pung option */}

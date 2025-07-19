@@ -180,15 +180,82 @@ export function GameTable({
     return positions[relativeIndex]
   }
 
+  const renderMelds = (player: Player, position: string) => {
+    if (position === 'top') {
+      // For top player, arrange melds in a 2x2 grid
+      const visibleMelds = player.melds.filter(meld => !meld.isConcealed);
+      const firstColumn = visibleMelds.slice(0, 2);
+      const secondColumn = visibleMelds.slice(2, 4);
+
+      return (
+        <div className="flex space-x-4">
+          {/* First column */}
+          {firstColumn.length > 0 && (
+            <div className="flex flex-col space-y-2">
+              {firstColumn.map((meld, index) => (
+                <div key={meld.id} className="flex items-center space-x-1">
+                  {meld.tiles.map((tile) => (
+                    <MahjongTile
+                      key={`${meld.id}-${tile.id}`}
+                      tile={tile}
+                      size="sm"
+                      className="transform -rotate-180"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Second column */}
+          {secondColumn.length > 0 && (
+            <div className="flex flex-col space-y-2">
+              {secondColumn.map((meld, index) => (
+                <div key={meld.id} className="flex items-center space-x-1">
+                  {meld.tiles.map((tile) => (
+                    <MahjongTile
+                      key={`${meld.id}-${tile.id}`}
+                      tile={tile}
+                      size="sm"
+                      className="transform -rotate-180"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // For left and right players, keep the vertical layout
+    return (
+      <div className="flex flex-col space-y-2">
+        {player.melds
+          .filter(meld => !meld.isConcealed)
+          .map((meld) => (
+            <div key={meld.id} className="flex items-center space-x-1">
+              {meld.tiles.map((tile) => (
+                <MahjongTile
+                  key={`${meld.id}-${tile.id}`}
+                  tile={tile}
+                  size="sm"
+                  className={cn(
+                    position === 'left' && "transform -rotate-90",
+                    position === 'right' && "transform rotate-90"
+                  )}
+                />
+              ))}
+            </div>
+          ))}
+      </div>
+    );
+  };
+
   const renderPlayer = (player: Player, index: number) => {
     const position = getPlayerPosition(index);
     const isCurrentPlayerTurn = gameState.currentPlayer === index;
     const isDealer = player.isDealer;
-
-    // Calculate the number of exposed sets for dynamic positioning
-    const exposedMeldCount = player.melds.filter(meld => !meld.isConcealed).length;
-    const flowerSetCount = player.flowers.length > 0 ? 1 : 0;
-    const exposedSetCount = exposedMeldCount + flowerSetCount;
 
     // Skip rendering the current user (bottom position) as it's integrated into PlayerHand
     if (position === 'bottom') {
@@ -204,16 +271,13 @@ export function GameTable({
         };
       }
 
-      // The box is now anchored to the vertical center of the table.
-      // The `transform: translateY(-50%)` will automatically adjust the position
-      // to keep it centered as the height of the component grows.
       const baseTopOffset = isMobile ? 50 : 45;
       const horizontalOffset = isMobile ? '4rem' : '8rem';
 
       const styles: React.CSSProperties = {
         top: `${baseTopOffset}%`,
         transform: 'translateY(-50%)',
-        transition: 'all 0.3s ease-in-out', // Smoothly transition size and other changes
+        transition: 'all 0.3s ease-in-out',
       };
 
       if (position === 'left') {
@@ -224,7 +288,6 @@ export function GameTable({
     
       return styles;
     };
-
 
     return (
       <div
@@ -248,102 +311,63 @@ export function GameTable({
               <div className="relative">
                 <Avatar className={cn(
                   'transition-all duration-300',
-                  isMobile ? 'w-8 h-8' : 'w-12 h-12',
-                  isCurrentPlayerTurn && 'ring-2 ring-accent/50'
+                  isCurrentPlayerTurn && 'ring-2 ring-accent scale-110',
+                  isMobile ? "h-8 w-8" : "h-10 w-10"
                 )}>
                   <AvatarImage src={player.avatar} />
-                  <AvatarFallback className={cn(
-                    "bg-primary text-primary-foreground font-semibold",
-                    isMobile ? "text-xs" : "text-sm"
-                  )}>
-                    {player.name.charAt(0)}
-                  </AvatarFallback>
+                  <AvatarFallback>{player.name[0]}</AvatarFallback>
                 </Avatar>
                 {isDealer && (
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center border-2 border-background">
-                    <Crown className="w-3 h-3 text-accent-foreground" />
-                  </div>
-                )}
-                {!player.isConnected && (
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-background flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  </div>
-                )}
-                {isCurrentPlayerTurn && (
-                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-background flex items-center justify-center animate-pulse">
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                  <div className="absolute -top-1 -right-1">
+                    <Crown className="w-4 h-4 text-yellow-500 drop-shadow-md" />
                   </div>
                 )}
               </div>
-              
-              <div className="min-w-0">
-                <div className="flex items-center space-x-2">
-                  <h4 className="font-medium text-sm truncate">{player.name}</h4>
-                  {player.hasVideo && (
-                    <Badge variant="secondary" className="text-xs">
-                      <Video className="w-3 h-3" />
-                    </Badge>
-                  )}
+              <div>
+                <div className="font-medium text-sm">{player.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {player.hand.length} tiles
                 </div>
-                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <span>Rating: {player.rating}</span>
-                  <span>•</span>
-                  <span>Tiles: {player.hand.length}</span>
-                </div>
-                {/* Show flowers */}
-                {player.flowers.length > 0 && (
-                  <div className="flex items-center space-x-1 mt-1">
-                    <span className="text-xs text-pink-400">Flowers:</span>
-                    {player.flowers.map((flower) => (
-                      <MahjongTile key={flower.id} tile={flower} size="sm" />
-                    ))}
-                  </div>
-                )}
-                
-                {/* Show melds */}
-                {player.melds.length > 0 && (
-                  <div className="mt-2">
-                    <div className="text-xs text-green-400 mb-1">Melds:</div>
-                    <div className="flex flex-col space-y-2">
-                      {player.melds.map((meld) => (
-                        <div key={meld.id} className="flex items-center space-x-1 p-1 bg-background/50 rounded-md">
-                          {meld.tiles.map((tile) => (
-                            <MahjongTile 
-                              key={`${meld.id}-${tile.id}`} 
-                              tile={tile} 
-                              size="sm"
-                              className={meld.isConcealed ? 'opacity-60' : ''}
-                            />
-                          ))}
-                          {!meld.isConcealed && (
-                            <Badge variant="outline" className="text-xs capitalize px-1 py-0">{meld.type}</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
-            
-            {isCurrentPlayerTurn && (
-              <div className="mt-2 flex items-center justify-center">
-                <div className="flex items-center space-x-2 text-xs">
-                  <Clock className="w-3 h-3 text-accent" />
-                  <span className={cn(
-                    'font-mono',
-                    timeLeft <= 10 ? 'text-red-400' : 'text-accent'
-                  )}>
-                    {timeLeft}s
-                  </span>
+
+            {/* Render melds using the new renderMelds function */}
+            {player.melds.filter(meld => !meld.isConcealed).length > 0 && (
+              <div className={cn(
+                "mt-3 pt-3 border-t border-border/30",
+                position === 'top' ? "flex justify-center" : ""
+              )}>
+                {renderMelds(player, position)}
+              </div>
+            )}
+
+            {/* Render flowers if any */}
+            {player.flowers.length > 0 && (
+              <div className={cn(
+                "mt-3 pt-3 border-t border-border/30",
+                position === 'top' ? "flex justify-center" : ""
+              )}>
+                <div className="flex space-x-1">
+                  {player.flowers.map((tile, index) => (
+                    <MahjongTile
+                      key={index}
+                      tile={tile}
+                      size="sm"
+                      className={cn(
+                        position === 'left' && "transform -rotate-90",
+                        position === 'right' && "transform rotate-90",
+                        position === 'top' && "transform -rotate-180"
+                      )}
+                    />
+                  ))}
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="relative w-full h-screen bg-gradient-to-br from-background via-background/50 to-card/10 overflow-hidden">
@@ -525,13 +549,85 @@ export function GameTable({
 
       {/* Dynamic Player Status Display */}
       <div className={cn(
-        "absolute z-40",
+        "absolute z-40 flex flex-col gap-2",
         isMobile ? "top-4 left-4" : "top-6 left-6"
       )}>
+        {/* Player Status Card */}
         <Card className="bg-card/95 backdrop-blur-md border border-border/40 shadow-lg">
           <CardContent className={isMobile ? "p-3" : "p-4"}>
-            {gameState.phase === 'claimResolution' && claimWindowTimeLeft > 0 ? (
-              // Claim Window with Timer Display
+            {/* Current Player Status Display */}
+            {(() => {
+              const currentActivePlayer = gameState.players[gameState.currentPlayer]
+              const isCurrentPlayerHuman = gameState.currentPlayer === currentPlayerIndex
+              
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className={cn(
+                        "relative p-2 rounded-lg transition-all duration-300",
+                        isCurrentPlayerHuman 
+                          ? "bg-gradient-to-br from-blue-500/10 to-blue-600/5 ring-1 ring-blue-500/20" 
+                          : "bg-gradient-to-br from-green-500/10 to-green-600/5 ring-1 ring-green-500/20"
+                      )}>
+                        {isCurrentPlayerHuman ? (
+                          <Users className="w-4 h-4 text-blue-500" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-400 to-green-500 animate-pulse shadow-sm" />
+                        )}
+                        {!isCurrentPlayerHuman && (
+                          <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-400 animate-ping" />
+                        )}
+                      </div>
+                      <div>
+                        <div className={cn(
+                          "font-medium text-sm",
+                          isCurrentPlayerHuman ? "text-blue-500" : "text-green-500"
+                        )}>
+                          {isCurrentPlayerHuman ? "Your Turn" : currentActivePlayer?.name || "AI Player"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {gameState.phase === 'draw' ? 'Drawing tile...' : 
+                           gameState.phase === 'discard' ? 'Choosing discard...' : 
+                           'Processing...'}
+                        </div>
+                      </div>
+                    </div>
+                    <Badge 
+                      variant={isCurrentPlayerHuman ? "default" : "secondary"} 
+                      className="text-xs"
+                    >
+                      {isCurrentPlayerHuman ? "Human" : "AI"}
+                    </Badge>
+                  </div>
+                  
+                  {/* Game State Info Row */}
+                  <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                    <div className="flex items-center space-x-3 text-xs">
+                      <div className="flex items-center space-x-1">
+                        <Crown className="w-3 h-3 text-accent" />
+                        <span className="text-muted-foreground">R{gameState.round}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        <span className="text-muted-foreground">{gameState.wind}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                        <span className="text-muted-foreground">{gameState.wall.length} tiles</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+          </CardContent>
+        </Card>
+
+        {/* Claim Timer Card - Appears below player status */}
+        {gameState.phase === 'claimResolution' && claimWindowTimeLeft > 0 && (
+          <Card className="bg-card/95 backdrop-blur-md border border-border/40 shadow-lg">
+            <CardContent className={isMobile ? "p-3" : "p-4"}>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -563,76 +659,9 @@ export function GameTable({
                   </div>
                 </div>
               </div>
-            ) : (
-              // Current Player Status Display
-              (() => {
-                const currentActivePlayer = gameState.players[gameState.currentPlayer]
-                const isCurrentPlayerHuman = gameState.currentPlayer === currentPlayerIndex
-                
-                return (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className={cn(
-                          "relative p-2 rounded-lg transition-all duration-300",
-                          isCurrentPlayerHuman 
-                            ? "bg-gradient-to-br from-blue-500/10 to-blue-600/5 ring-1 ring-blue-500/20" 
-                            : "bg-gradient-to-br from-green-500/10 to-green-600/5 ring-1 ring-green-500/20"
-                        )}>
-                          {isCurrentPlayerHuman ? (
-                            <Users className="w-4 h-4 text-blue-500" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-400 to-green-500 animate-pulse shadow-sm" />
-                          )}
-                          {!isCurrentPlayerHuman && (
-                            <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-400 animate-ping" />
-                          )}
-                        </div>
-                        <div>
-                          <div className={cn(
-                            "font-medium text-sm",
-                            isCurrentPlayerHuman ? "text-blue-500" : "text-green-500"
-                          )}>
-                            {isCurrentPlayerHuman ? "Your Turn" : currentActivePlayer?.name || "AI Player"}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {gameState.phase === 'draw' ? 'Drawing tile...' : 
-                             gameState.phase === 'discard' ? 'Choosing discard...' : 
-                             'Processing...'}
-                          </div>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={isCurrentPlayerHuman ? "default" : "secondary"} 
-                        className="text-xs"
-                      >
-                        {isCurrentPlayerHuman ? "Human" : "AI"}
-                      </Badge>
-                    </div>
-                    
-                    {/* Game State Info Row */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border/30">
-                      <div className="flex items-center space-x-3 text-xs">
-                        <div className="flex items-center space-x-1">
-                          <Crown className="w-3 h-3 text-accent" />
-                          <span className="text-muted-foreground">R{gameState.round}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          <span className="text-muted-foreground">{gameState.wind}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 rounded-full bg-muted-foreground" />
-                          <span className="text-muted-foreground">{gameState.wall.length} tiles</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })()
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Claim options modal */}

@@ -72,7 +72,7 @@ export function PlayerHand({
   }, [tiles, onTileReorder])
 
   // Drag and drop handlers
-  const handleDragStart = (e: React.DragEvent, tile: Tile, index: number) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, tile: Tile, index: number) => {
     setDraggedTile(tile)
     setIsDragging(true)
     e.dataTransfer.effectAllowed = 'move'
@@ -95,25 +95,25 @@ export function PlayerHand({
     setTimeout(() => setIsDragging(false), 100)
   }
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     setDragOverIndex(index)
   }
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     dragCounter.current++
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     dragCounter.current--
     if (dragCounter.current === 0) {
       setDragOverIndex(null)
     }
   }
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
     e.preventDefault()
     
     if (!draggedTile) return
@@ -156,8 +156,71 @@ export function PlayerHand({
   }, [isCurrentTurn, handleAutoSort])
 
   return (
-    <Card className="bg-card/96 backdrop-blur-md border border-border/40 shadow-xl">
-      <CardContent className={isMobile ? "p-3" : "p-4"}>
+    <Card className={cn(
+      "bg-card/96 backdrop-blur-md border border-border/40 shadow-xl",
+      "transition-all duration-300 ease-in-out", // Smooth transitions for size changes
+      "absolute left-1/2 bottom-[35%] transform -translate-x-1/2", // Moved up from bottom-1/2 to bottom-[35%]
+      // Dynamic width based on content
+      handTiles.length <= 8 ? "w-[500px]" : 
+      handTiles.length <= 12 ? "w-[600px]" : 
+      "w-[700px]"
+    )}>
+      <CardContent className={cn(
+        isMobile ? "p-3" : "p-4",
+        "relative" // Added to establish positioning context
+      )}>
+        {/* Exposed melds section - Now positioned to the left */}
+        {(player.flowers.length > 0 || player.melds.length > 0) && (
+          <div className={cn(
+            "absolute right-full top-0 pr-4", // Position to the left of the UI box
+            "flex flex-col items-end gap-2", // Stack vertically and align to the right
+            "transition-all duration-300 ease-in-out" // Smooth transitions
+          )}>
+            {/* Flowers */}
+            {player.flowers.length > 0 && (
+              <div className="flex flex-col items-end gap-1">
+                <Badge variant="outline" className="text-xs px-1 py-0">Flowers</Badge>
+                <div className="flex gap-0.5">
+                  {player.flowers.map((flower, index) => (
+                    <MahjongTile
+                      key={index}
+                      tile={flower}
+                      size="sm"
+                      className={cn(
+                        "transform scale-90",
+                        isMobile && "transform scale-75"
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Melds */}
+            {player.melds.length > 0 && (
+              <div className="flex flex-col items-end gap-2">
+                <Badge variant="outline" className="text-xs px-1 py-0">Melds</Badge>
+                {player.melds.map((meld, index) => (
+                  <div key={index} className="flex gap-0.5">
+                    {meld.tiles.map((tile, tileIndex) => (
+                      <MahjongTile
+                        key={tileIndex}
+                        tile={tile}
+                        size="sm"
+                        className={cn(
+                          meld.isConcealed ? "opacity-60" : "",
+                          "transform scale-90",
+                          isMobile && "transform scale-75"
+                        )}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Enhanced Player Profile Section */}
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/30">
           <div className="flex items-center space-x-3">
@@ -238,65 +301,12 @@ export function PlayerHand({
             )}
           </div>
         </div>
-        
-        {/* Compact flowers and melds section - positioned to avoid table overlap */}
-        {(player.flowers.length > 0 || player.melds.length > 0) && (
-          <div className={cn(
-            "absolute z-20",
-            isMobile 
-              ? "left-0 top-0 transform -translate-x-full -translate-y-2 pr-2 max-w-[120px]" 
-              : "left-0 top-1/2 transform -translate-x-full -translate-y-1/2 pr-4 max-w-[200px]"
-          )}>
-            {/* Flowers */}
-            {player.flowers.length > 0 && (
-              <div className="mb-2">
-                <div className="text-xs text-pink-400 font-medium mb-1">Flowers</div>
-                <div className="flex flex-wrap gap-1">
-                  {player.flowers.map((flower) => (
-                    <MahjongTile key={flower.id} tile={flower} size="sm" />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Melds */}
-            {player.melds.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-xs text-green-400 font-medium">Melds</div>
-                {player.melds.map((meld) => (
-                  <div key={meld.id} className="space-y-1">
-                    <div className="flex items-center space-x-1">
-                      <Badge variant="outline" className="text-xs capitalize px-1 py-0">
-                        {meld.type}
-                      </Badge>
-                      {!meld.isConcealed && (
-                        <Badge variant="secondary" className="text-xs px-1 py-0">
-                          Exposed
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {meld.tiles.map((tile) => (
-                        <MahjongTile 
-                          key={`${meld.id}-${tile.id}`} 
-                          tile={tile} 
-                          size="sm"
-                          className={meld.isConcealed ? 'opacity-60' : ''}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
+
+        {/* Hand tiles section */}
         <div className="relative">
           <div className={cn(
-            isMobile 
-              ? "grid grid-cols-9 gap-1 justify-items-center min-h-[90px] max-w-full" // 2-row grid on mobile (9 tiles per row max)
-              : "flex items-center justify-center space-x-1 min-h-[60px]"
+            "flex flex-wrap gap-2 justify-center min-h-[120px]",
+            isMobile && "gap-1"
           )}>
             <AnimatePresence mode="popLayout">
               {handTiles.map((tile, index) => (
@@ -307,53 +317,54 @@ export function PlayerHand({
                   animate={{ 
                     opacity: draggedTile?.id === tile.id ? 0.3 : 1,
                     scale: draggedTile?.id === tile.id ? 0.95 : 1,
-                    y: selectedTile?.id === tile.id ? (isMobile ? -4 : -6) : 0
+                    y: selectedTile?.id === tile.id ? -8 : 0
                   }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileHover={{ y: isMobile ? -2 : -4 }}
+                  whileHover={{ y: -4 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className={`
-                    relative cursor-grab active:cursor-grabbing flex-shrink-0
-                    ${dragOverIndex === index ? 'z-10' : ''}
-                  `}
-                  draggable={!isMobile} // Disable drag on mobile for better touch experience
-                  onDragStart={(e) => handleDragStart(e as React.DragEvent, tile, index)}
-                  onDragEnd={(e) => handleDragEnd()}
-                  onDragOver={(e) => handleDragOver(e as React.DragEvent, index)}
-                  onDragEnter={(e) => handleDragEnter(e as React.DragEvent)}
-                  onDragLeave={(e) => handleDragLeave(e as React.DragEvent)}
-                  onDrop={(e) => handleDrop(e as React.DragEvent, index)}
                 >
-                  {/* Drop zone indicator */}
-                  {dragOverIndex === index && draggedTile?.id !== tile.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute inset-0 bg-accent/20 border-2 border-accent border-dashed rounded-lg z-0"
-                    />
-                  )}
-                  
-                  <MahjongTile
-                    tile={tile}
-                    size={isMobile ? "sm" : "md"}
-                    isSelected={selectedTile?.id === tile.id}
-                    isDisabled={!isCurrentTurn}
+                  <div
+                    className={cn(
+                      "relative cursor-grab active:cursor-grabbing",
+                      dragOverIndex === index && "z-10"
+                    )}
+                    draggable={isDragMode}
+                    onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, tile, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e: React.DragEvent<HTMLDivElement>) => handleDragOver(e, index)}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e: React.DragEvent<HTMLDivElement>) => handleDrop(e, index)}
                     onClick={() => handleTileClick(tile)}
-                    className={`
-                      transition-all duration-200 relative z-10
-                      ${selectedTile?.id === tile.id ? 'ring-2 ring-accent shadow-lg' : ''}
-                      ${tile.isRecentlyDrawn ? 'ring-2 ring-blue-400 shadow-blue-400/50' : ''}
-                      hover:shadow-xl hover:scale-105
-                      ${draggedTile?.id === tile.id ? 'shadow-2xl ring-2 ring-primary' : ''}
-                    `}
-                  />
+                  >
+                    {/* Drop zone indicator */}
+                    {dragOverIndex === index && draggedTile?.id !== tile.id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute inset-0 bg-accent/20 border-2 border-accent border-dashed rounded-lg z-0"
+                      />
+                    )}
+                    
+                    <MahjongTile
+                      tile={tile}
+                      size={isMobile ? "sm" : "md"}
+                      className={cn(
+                        "transition-all duration-200 relative z-10",
+                        selectedTile?.id === tile.id && "ring-2 ring-accent shadow-lg",
+                        tile.isRecentlyDrawn && "ring-2 ring-blue-400 shadow-blue-400/50",
+                        "hover:shadow-xl hover:scale-105",
+                        draggedTile?.id === tile.id && "shadow-2xl ring-2 ring-primary"
+                      )}
+                    />
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
-
+        
         {/* Enhanced action buttons section */}
         <div className="mt-3 pt-3 border-t border-border/30">
           <div className={cn(

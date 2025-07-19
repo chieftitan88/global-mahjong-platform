@@ -73,6 +73,12 @@ export interface GameState {
     timeout?: number
     cleanup?: () => void
   } | null
+  winningTile?: Tile | null
+  winningHand?: {
+    tiles: Tile[]
+    melds: Meld[]
+    flowers: Tile[]
+  } | null
 }
 
 export interface AmbitionRecord {

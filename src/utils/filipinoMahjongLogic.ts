@@ -212,6 +212,14 @@ export function drawTile(gameState: GameState, playerIndex: number): Tile | null
     gameState.winner = playerIndex
     gameState.winType = winCondition.handType
     gameState.phase = 'finished'
+    
+    // Capture winning hand and winning tile
+    gameState.winningTile = drawnTile
+    gameState.winningHand = {
+      tiles: [...player.hand],
+      melds: [...player.melds],
+      flowers: [...player.flowers]
+    }
   } else {
     console.log(`❌ ${player.name} does not have a winning hand (total tiles: ${totalTiles}, expected: 17)`)
   }
@@ -739,6 +747,14 @@ export function processClaim(gameState: GameState, claim: ClaimAction): boolean 
         gameState.winner = playerIndex
         gameState.winType = winCondition.handType
         gameState.phase = 'finished'
+        
+        // Capture winning hand and winning tile
+        gameState.winningTile = lastDiscard
+        gameState.winningHand = {
+          tiles: [...player.hand, lastDiscard],
+          melds: [...player.melds],
+          flowers: [...player.flowers]
+        }
         
         // Record win ambitions
         winCondition.ambitions.forEach(ambition => {

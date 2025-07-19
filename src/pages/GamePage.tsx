@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GameTable } from '@/components/mahjong/GameTable'
+import WinningHandViewer from '@/components/mahjong/WinningHandViewer'
 import { GameState, Player, Tile, ClaimAction } from '@/types/mahjong'
 import {
   initializeGame,
@@ -32,6 +33,7 @@ export function GamePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [claimTimeout, setClaimTimeout] = useState<number | null>(null)
+  const [showWinningHand, setShowWinningHand] = useState(false)
   const [aiInstances] = useState(() => ({
     'ai-1': createEnhancedAI('expert'),
     'ai-2': createEnhancedAI('expert'), 
@@ -113,7 +115,8 @@ export function GamePage() {
     if (gameState?.status === 'finished' && gameState.winner !== undefined) {
       const winner = gameState.players[gameState.winner]
       playWin()
-      // Win notification integrated into status display
+      // Show winning hand viewer
+      setShowWinningHand(true)
       console.log(`🏆 Game finished! Winner: ${winner.name}, Win type: ${gameState.winType}`)
     }
   }, [gameState?.status, gameState?.winner]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -650,6 +653,17 @@ export function GamePage() {
           onClaimTimeout={handleClaimTimeout}
         />
       </div>
+
+      {/* Winning Hand Viewer */}
+      {showWinningHand && gameState?.winner !== undefined && gameState.winningHand && (
+        <WinningHandViewer
+          winnerName={gameState.players[gameState.winner].name}
+          winningTile={gameState.winningTile || null}
+          winningHand={gameState.winningHand}
+          winType={gameState.winType}
+          onClose={() => setShowWinningHand(false)}
+        />
+      )}
     </div>
   )
 }

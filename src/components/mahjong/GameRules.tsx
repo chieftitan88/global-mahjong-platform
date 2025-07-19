@@ -15,145 +15,148 @@ interface GameRulesProps {
 }
 
 const friendlyRules = `
-# 🀄️ Welcome to Filipino Mahjong! 🀄️
+# 🀄️ **Filipino Mahjong: The Ultimate Guide** 🀄️
 
-This guide will walk you through the exciting world of Filipino Mahjong, a unique and fast-paced version of the classic game. Get ready to learn the ropes and master the art of forming winning hands!
-
----
-
-### **🌟 The Goal of the Game**
-
-Your main objective is to be the first of four players to form a **complete winning hand** of 17 tiles. A standard winning hand is made up of:
-- **Five (5) Sets** (either a Pung, Kong, or Chow)
-- **One (1) Pair** of identical tiles (known as the "eyes")
-
-Think of it like collecting special groups of cards, but with beautifully crafted Mahjong tiles!
+_Welcome to the definitive guide for Filipino Mahjong! This rulebook is designed to be clear, concise, and visually appealing to help you master the game._
 
 ---
 
-### **🀄 Tiles of the Trade: What's in the Set?**
+## 🎯 **The Objective: Your Path to Victory**
 
-The game uses a 144-tile set, divided into three main categories:
+Your primary goal is to be the first of four players to achieve **"Mahjong"** by forming a complete, 17-tile winning hand.
 
-#### **Suits (The Core Tiles)**
-These are like the numbered cards in a deck, and you'll use them to form most of your sets.
-- **Circles (Dots):** Numbered 1 to 9
-- **Bamboos (Sticks):** Numbered 1 to 9
-- **Characters (Wan):** Numbered 1 to 9
+A standard winning hand is composed of:
 
-#### **Honor Tiles (The Power Tiles)**
-These special tiles don't have numbers but can be used to form powerful sets.
-- **Winds:** East, South, West, North
-- **Dragons:** Red, Green, White (often represented by a blank tile)
+- **Five (5) Sets**
+  - _Can be a **Pung** (three identical tiles), **Kong** (four identical tiles), or **Chow** (a sequence of three)._
 
-#### **Bonus Tiles (The Lucky Tiles)**
-These are special tiles that give you immediate bonus points!
-- **Flowers:** Plum, Orchid, Chrysanthemum, Bamboo
-- **Seasons:** Spring, Summer, Autumn, Winter
-
-When you draw a Bonus Tile, it's immediately placed aside, and you get to draw a replacement tile from the wall. It's like a free-turn coupon!
+- **One (1) Pair**
+  - _Two identical tiles, which serve as the "eyes" of your hand._
 
 ---
 
-### **🚀 Getting Started: The Setup**
+## 🎲 **The Mahjong Tiles: Know Your Tools**
 
-1.  **Dealing:** Each player starts with 16 tiles. The dealer (marked with an East wind) gets an extra 17th tile to begin the game.
-2.  **Player Turns:** The game moves in a clockwise direction, starting from the Dealer.
+The game is played with a 144-tile set, divided into the following categories:
+
+### **Suits: The Foundation of Your Hand**
+
+*   **Circles (Dots):** Numbered 1 through 9
+*   **Bamboos (Sticks):** Numbered 1 through 9
+*   **Characters (Wan):** Numbered 1 through 9
+
+### **Honor Tiles: The Power Players**
+
+*   **Winds:** East, South, West, North
+*   **Dragons:** Red, Green, and White
+
+### **Bonus Tiles: Your Lucky Charms**
+
+*   **Flowers:** Plum, Orchid, Chrysanthemum, Bamboo
+*   **Seasons:** Spring, Summer, Autumn, Winter
+
+> **💡 Pro Tip: Bonus Tiles**
+>
+> When you draw a Flower or Season, you must immediately reveal it, place it to the side, and draw a replacement tile. This gives you a bonus and gets you closer to victory!
 
 ---
 
-### **🔄 How to Play: The Flow of the Game**
+## 🎮 **Game Flow: The Rhythm of Play**
 
-Each player's turn consists of two simple steps:
+### **Setup and Dealing**
 
-#### **Step 1: Draw**
-- Start your turn by drawing one tile from the main wall. You will now have 17 tiles in your hand temporarily.
-- If you draw a Bonus Tile (Flower or Season), show it to everyone, place it in your bonus area, and draw another tile. Lucky you!
+1.  **Dealing:** All players start with 16 tiles. The Dealer (East Wind) begins with an extra tile, for a total of 17.
+2.  **Turn Order:** Play proceeds in a clockwise direction, beginning with the Dealer.
 
-#### **Step 2: Discard**
-- After drawing, you must choose one tile from your hand to discard, placing it face-up in the center of the table. This brings your hand back to 16 tiles.
-- **This is the most important part of your turn!** Your discard can be claimed by other players to complete their own sets.
+### **A Player's Turn: Draw and Discard**
+
+1.  **Draw:** Begin your turn by drawing one tile from the wall.
+2.  **Discard:** After drawing, you must discard one tile from your hand, placing it face-up in the center for all to see.
 
 ---
 
-### **🙌 Making a Move: Claiming a Discard**
+## ⚡ **Claiming Discards: Seizing Opportunities**
 
-When another player discards a tile, you might have the opportunity to claim it to complete a set in your own hand. This is where the real strategy begins!
+When a player discards a tile, you may have a chance to claim it. Claims are resolved in a specific order of priority:
 
-Here are the claims you can make, from highest to lowest priority:
+### **1. WIN (Mahjong!)** 🏆
 
-#### **1. WIN (Mahjong!)**
-- **What it is:** The discarded tile is the final piece you need to complete your 17-tile winning hand.
+- **What it is:** The discarded tile is the final piece needed to complete your 17-tile winning hand.
+- **Who can claim:** Any player can claim a discard to win.
+- **Action:** Declare "Mahjong!" to win the round.
+
+### **2. KONG (A Set of Four)**
+
+- **What it is:** You hold three identical tiles, and the discard is the fourth.
 - **Who can claim:** Any player.
-- **Result:** You declare "Mahjong!", show your winning hand, and win the round!
+- **Action:** Declare "Kong," reveal the set, and draw a replacement tile.
 
-#### **2. KONG (A Set of Four)**
-- **What it is:** A set of four identical tiles. You must already have three identical tiles concealed in your hand.
+### **3. PUNG (A Set of Three)**
+
+- **What it is:** You hold two identical tiles, and the discard is the third.
 - **Who can claim:** Any player.
-- **Result:** You take the discard, reveal your set of four, and place it face-up. Because a Kong is a 4-tile set, you must draw a replacement tile from the wall before discarding. Your turn continues.
+- **Action:** Declare "Pung" and reveal the set.
 
-#### **3. PUNG (A Set of Three)**
-- **What it is:** A set of three identical tiles. You must already have two identical tiles (a pair) in your hand.
-- **Who can claim:** Any player.
-- **Result:** You take the discard, reveal your set of three, and place it face-up. You then discard a tile, and your turn continues.
+### **4. CHOW (A Sequence of Three)**
 
-#### **4. CHOW (A Sequence of Three)**
-- **What it is:** A sequence of three consecutive numbers in the same suit (e.g., 4-5-6 of Bamboos).
-- **Who can claim:** **ONLY the player whose turn is immediately after the discarder.** This is a key rule in Filipino Mahjong! You cannot claim a Chow from a player across the table.
-- **Result:** You take the discard, reveal your sequence, and place it face-up. You then discard a tile, and your turn continues.
+- **What it is:** The discard completes a three-tile sequence in the same suit (e.g., 4-5-6 of Bamboos).
+- **Who can claim:** **Strictly limited to the player whose turn is *immediately after* the discarder.**
+- **Action:** Declare "Chow" and reveal the sequence.
 
-**Claiming Window:** You only have a few seconds to decide if you want to claim a tile. If multiple players want the same tile, the player with the higher priority claim (e.g., Pung beats Chow) gets the tile.
+> **⏰ Important Reminder:**
+>
+> The claim window is brief. If multiple players make a claim, the highest priority action (Win > Kong > Pung > Chow) takes precedence.
 
 ---
 
-### **🏆 How to Win: Building Your Hand**
+## 🏆 **Winning Hands: Two Paths to Glory**
 
-There are two main ways to construct a winning hand:
+### **Standard Hand (The Classic)**
 
-#### **Standard Hand (The Classic Win)**
-- **Formula:** 5 Sets + 1 Pair (17 tiles total)
-- **Example:**
-  - A Pung of 2s
-  - A Chow of 4-5-6 of Circles
-  - A Pung of Red Dragons
-  - A Kong of West Winds
-  - A Chow of 7-8-9 of Bamboos
-  - A Pair of 1s (your "eyes")
+- **Composition:** 5 Sets + 1 Pair
+- **Strategy:** A flexible and common way to win, allowing for a mix of Pungs, Kongs, and Chows.
 
-#### **Siete Pares (Seven Pairs)**
-- **Formula:** 7 Pairs + 1 Trio (either a Pung or a Chow)
-- This is a special, harder-to-get hand that comes with a big bonus!
-- **Example:**
-  - 7 different pairs (e.g., two 1s, two 3s, two East Winds, etc.)
-  - One 3-tile set (e.g., 8-8-8 or 4-5-6 of Circles)
+### **Siete Pares (The Seven Pairs)**
+
+- **Composition:** 7 distinct Pairs + 1 Trio (either a Pung or a Chow).
+- **Strategy:** A special and high-scoring hand that is more challenging to assemble but offers a greater reward.
 
 ---
 
-### **✨ Ambitions: Declaring Special Hands for Bonuses**
+## ✨ **Ambitions: Declaring for Bonus Points**
 
-Filipino Mahjong has an exciting "ambition" system where you can earn bonus points for achieving special feats during the game. Some common ambitions include:
+During the game, you can declare special hands, known as "ambitions," for bonus points:
+
 - **Kang:** Forming a Kong.
-- **Escalera:** Forming a complete 1-9 sequence in the same suit across three Chow sets.
-- **All Up:** Having a hand made entirely of Pungs/Kongs (no Chows).
-
-These add an extra layer of strategy and excitement to the game!
+- **Escalera:** Creating a 1-9 sequence of the same suit using three Chow sets.
+- **All Up:** A hand composed entirely of Pungs and/or Kongs.
 
 ---
 
-Good luck, and may the tiles be ever in your favor! 🍀
+## 🎓 **Key Strategies for Success**
+
+1.  **Be Decisive:** The clock is ticking on claims. Act quickly.
+2.  **Discard Wisely:** Pay attention to what other players are discarding to avoid giving them a winning tile.
+3.  **Remember the Chow Rule:** Don't miss your chance to claim a Chow, and don't try to claim one out of turn.
+
+---
+
+## 🍀 **Good Luck and Have Fun!**
+
+_The best way to learn is to play. Embrace the process, and may the tiles be in your favor!_
 `
 
 export function GameRules({ isOpen, onClose }: GameRulesProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader>
-          <DialogTitle>Filipino Mahjong Rules</DialogTitle>
-          <DialogDescription>
-            The complete guide to playing Filipino Mahjong.
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-2xl text-center">Filipino Mahjong Rules</DialogTitle>
+          <DialogDescription className="text-center text-base">
+            Complete guide to playing Filipino Mahjong
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[70vh] w-full rounded-md border p-4">
+        <ScrollArea className="h-[70vh] w-full rounded-md border p-6">
           <div className="prose dark:prose-invert max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {friendlyRules}
